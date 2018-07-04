@@ -10,8 +10,12 @@
   
   <h1>Orden:</h1>
   <ul>
-    <li v-for="producto in orden" :key="producto.id">
-      {{producto.id}} - {{producto.nombre}} - {{producto.precio.toFixed(2)}} - {{producto.cantidad}} - {{producto.total.toFixed(2)}}
+    <li v-for="(producto, index) in orden" :key="producto.id">
+      {{producto.id}} - 
+      {{producto.nombre}} - 
+      {{producto.precio.toFixed(2)}} - 
+      <input id="cantidad" type="text" v-model="producto.cantidad" :data-id="producto.id" :data-index="index" @input="changeField"> -
+      {{producto.total.toFixed(2)}}
     </li>
   </ul>
 
@@ -63,20 +67,37 @@ export default {
       else
       {
         let elem = this.productos.find(elem => elem.id == id);
-        elem.cantidad = 1;
+        elem.cantidad = 0;
         elem.total = elem.precio * elem.cantidad;
         this.orden.push(elem);
       }
+    },
+    changeField: function(e){
+      let propiedad = e.target.id;
+      let valor = e.target.value;
+      let index = e.target.dataset.index;
+      let id = e.target.dataset.id;
+      let elem = this.orden.find(elem => elem.id == id);
+      elem[propiedad] = valor;
+      this.$set(this.orden, index, elem);
     }
   },
   computed: {
     articulos: function(){
-      this.orden.forEach(elem=> this.n += elem.cantidad);
-      return this.n;
+      let suma = 0;
+      for(let n = 0; n < this.orden.length; n++)
+      {
+        suma += parseFloat(this.orden[n].cantidad);
+      }
+      return suma;
     },
     subtotal: function(){
-      this.orden.forEach(elem => this.n1 += elem.total)
-      return this.n1.toFixed(2);
+      let suma = 0;
+      for(let n = 0; n < this.orden.length; n++)
+      {
+        suma += this.orden[n].total;
+      }
+      return suma.toFixed(2);
     },
     impuesto: function(){
       return (this.tax * this.subtotal / 100).toFixed(2);
